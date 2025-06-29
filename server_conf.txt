@@ -1,0 +1,12 @@
+# !!REMINDER!! do not put '' on directories names
+# !!REMINDER!! MAKE KEYS CAPITALIZED
+# change this to change the port 0.0.0.0:xxxx
+PORT=80 
+# true or false to turn on or off the ability to all people on the network
+HOST=true
+# determines the directory in which the files which contain users data would be saved # preferably do not change
+USERS_DIR=accounts
+#determines where will files uploaded from users to their own space be saved
+STORAGE_DIR=storage
+#determines where media be
+MEDIA_DIR=Media

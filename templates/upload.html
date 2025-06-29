@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='server.ico') }}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Upload - Home Server</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #121212;
+      color: #ffffff;
+    }
+
+    header {
+      background-color: #1f1f1f;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      color: #00ffff;
+      margin: 0;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    nav a {
+      color: #00ffff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .logout-btn {
+      background-color: #ff3366;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .logout-btn:hover {
+      background-color: #ff0044;
+    }
+
+    main {
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: #1e1e1e;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      color: #00ffff;
+      text-shadow: 0 0 8px rgba(0, 255, 255, 0.3);
+    }
+
+    /* Upload Zone Styles */
+    .upload-zone {
+      border: 2px dashed #00ffff55;
+      border-radius: 10px;
+      padding: 3rem 2rem;
+      text-align: center;
+      margin: 1.5rem 0;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.active {
+      border-color: #00ffff;
+      background-color: #00ffff11;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      color: #00ffff;
+      margin-bottom: 1rem;
+    }
+
+    .upload-text {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+      color: #121212;
+      padding: 0.8rem 2rem;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 15px rgba(0, 200, 255, 0.3);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 200, 255, 0.5);
+    }
+
+    .selected-files {
+      margin-top: 1.5rem;
+      border-top: 1px solid #00ffff33;
+      padding-top: 1.5rem;
+    }
+
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #252525;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background-color: #1f1f1f;
+      font-size: 0.9rem;
+      color: #777;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Upload Files</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/media">Media</a>
+      <a href="/upload">Upload</a>
+      <form action="/logout" method="POST" style="display: inline; margin: 0;">
+        <button type="submit" class="logout-btn">Logout</button>
+      </form>
+    </nav>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Upload New Files</h2>
+      
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-icon">⬆️</div>
+        <div class="upload-text">Drag & Drop files here or click to browse</div>
+        <input type="file" id="fileInput" class="file-input" multiple>
+        <button class="submit-btn" id="uploadBtn">Select Files</button>
+      </div>
+      
+      <div class="selected-files" id="selectedFiles">
+        <!-- Files will appear here when selected -->
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    &copy; 2025 Home Server by Ali Jaradat
+  </footer>
+
+  <script>
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const selectedFiles = document.getElementById('selectedFiles');
+
+    // Click to browse files
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadBtn.addEventListener('click', () => fileInput.click());
+
+    // Handle file selection
+    fileInput.addEventListener('change', () => {
+      handleFiles(fileInput.files);
+    });
+
+    // Drag and drop functionality
+    ['dragenter', 'dragover'].forEach(eventName => {
+      uploadZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('active');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      uploadZone.addEventListener(eventName, () => {
+        uploadZone.classList.remove('active');
+      });
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      handleFiles(e.dataTransfer.files);
+    });
+
+    // Handle selected files
+    function handleFiles(files) {
+      selectedFiles.innerHTML = '<h3>Selected Files:</h3>';
+      
+      if (files.length === 0) return;
+      
+      Array.from(files).forEach(file => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = `
+          <span>${file.name}</span>
+          <span>${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+        `;
+        selectedFiles.appendChild(fileItem);
+      });
+
+      // Create submit button if files are selected
+      if (!document.getElementById('submitUpload')) {
+        const submitBtn = document.createElement('button');
+        submitBtn.id = 'submitUpload';
+        submitBtn.className = 'submit-btn';
+        submitBtn.textContent = 'Upload Files';
+        submitBtn.style.marginTop = '1.5rem';
+        submitBtn.addEventListener('click', uploadFiles);
+        selectedFiles.appendChild(submitBtn);
+      }
+    }
+
+    // Upload files to server
+    function uploadFiles() {
+      const formData = new FormData();
+      const files = fileInput.files;
+      
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+      }
+
+      fetch('/upload', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          alert('Files uploaded successfully!');
+          window.location.href = '/media';
+        } else {
+          alert('Upload failed');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Upload error');
+      });
+    }
+  </script>
+</body>
+</html>

@@ -116,7 +116,7 @@ def favicon():
 @app.route('/download_media',methods=['GET','POST'])
 def download_videos():
     if 'username' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login_page'))
     if request.method.lower() == 'post':
         url = request.form.get('url')
         data_format = request.form.get('format')
